@@ -1,4 +1,5 @@
 #include "relMatr.h"
+#include <fstream>
 
 relMatr::relMatr (size_t am){
     amount = am;
@@ -31,6 +32,16 @@ void relMatr::fill (){
     for (size_t i = 0; i < amount; i++){
         for (size_t j = 0; j < amount; j++){
             std::cin>>matr[i][j];
+        }
+    }
+    std::cout<<std::endl;
+}
+
+void relMatr::fill (const char* filename){
+    std::ifstream input (filename);
+    for (size_t i = 0; i < amount; i++){
+        for (size_t j = 0; j < amount; j++){
+            input>>matr[i][j];
         }
     }
     std::cout<<std::endl;

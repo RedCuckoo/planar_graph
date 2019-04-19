@@ -1,6 +1,6 @@
 #include "vertex.h"
 
-vertex::vertex(relVec work, size_t number){
+vertex::vertex(relVec &work, size_t number){
     degree = work.get_deg(number);
     num = number;
 
@@ -32,3 +32,50 @@ vertex::~vertex(){
     delete next_num;
 }
 
+void vertex::set_visited (){
+    temp = true;
+}
+
+void vertex::set_blank(){
+    temp = false;
+}
+
+void vertex::col_gray(){
+    color = 1;
+}
+
+void vertex::col_black(){
+    color = 2;
+}
+
+void vertex::col_white(){
+    color = 0;
+}
+
+bool vertex::gray(){
+    return (color == 1) ? true : false;
+}
+
+bool vertex::black(){
+    return (color == 2) ? true : false;
+}
+
+bool vertex::white(){
+    return (color == 0) ? true : false;
+}
+
+bool vertex::visited(){
+    return temp;
+}
+
+size_t vertex::get_num(){
+    return num;
+}
+
+size_t vertex::operator[] (size_t i){
+    return next_num[i];
+}
+
+size_t vertex::get_degree(){
+    return degree;
+}

@@ -15,6 +15,7 @@ public:
     bool get_el (int i, int j);
     size_t size();
     void fill ();
+    void fill (const char* filename);
     void out() ;
     ~relMatr();
 };

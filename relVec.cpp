@@ -32,6 +32,7 @@ size_t relVec::size(){
 size_t relVec::get_deg (size_t vertex){
     //calculates the degree of the vertex, by the number in the vector
     unsigned temp = rows[vertex];
+
     size_t ans = 0;
 
     while (temp){
