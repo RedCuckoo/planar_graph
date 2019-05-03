@@ -2,18 +2,25 @@
 #define VERTEX_H
 #include "relVec.h"
 #include <iostream>
+#include <vector>
 
 class vertex{
 private:
-    int* next_num;
+    //array of connected vertexes
+    size_t* next_num;
+
+    //the unique number of current vertex
     size_t num;
+    //degree of this vertex
+    size_t degree;
+
     bool temp;
     size_t color = 0;
-    size_t degree;
 
 public:
 
     vertex(relVec &work, size_t number);
+    vertex (size_t number, size_t firstVertex, size_t secondVertex);
     ~vertex();
     void set_visited ();
     void set_blank();
@@ -27,6 +34,8 @@ public:
     size_t get_degree();
     size_t get_num();
     void out();
+    void delNext(size_t delThis);
+
     //returns vertexes connected to the current
     size_t operator[] (size_t i);
 };

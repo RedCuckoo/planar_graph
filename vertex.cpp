@@ -4,7 +4,7 @@ vertex::vertex(relVec &work, size_t number){
     degree = work.get_deg(number);
     num = number;
 
-    next_num = new int [degree];
+    next_num = new size_t [degree];
 
     size_t workS = work.size();
 
@@ -19,6 +19,17 @@ vertex::vertex(relVec &work, size_t number){
     }
 }
 
+
+vertex::vertex (size_t number, size_t firstVertex, size_t secondVertex){
+    degree = 2;
+    num = number;
+
+    next_num = new size_t [degree];
+
+    next_num[0] = (firstVertex<secondVertex) ? firstVertex : secondVertex;
+    next_num[1] = (firstVertex>secondVertex) ? firstVertex : secondVertex;
+}
+
 void vertex::out(){
     std::cout<<"DEG: "<<degree<<" NUM: "<<num<<std::endl;
     std::cout<<"NEXT VERTICES: ";
@@ -29,6 +40,7 @@ void vertex::out(){
 }
 
 vertex::~vertex(){
+    next_num = nullptr;
     delete next_num;
 }
 
@@ -78,4 +90,27 @@ size_t vertex::operator[] (size_t i){
 
 size_t vertex::get_degree(){
     return degree;
+}
+
+void vertex::delNext(size_t delThis){
+    for (size_t i = 0; i < degree; i++){
+        if (this->next_num[i] == delThis){
+            int* temp = new int [--degree];
+            int k = 0;
+            for (size_t j = 0; j < degree+1; j++){
+                if (i!=j){
+                    temp[k++] = this->next_num[j];
+                }
+            }
+
+            delete next_num;
+            next_num = new size_t [degree];
+
+            for (size_t j = 0; j < degree; j++){
+                this->next_num[j] = temp[j];
+            }
+            delete temp;
+            return;
+        }
+    }
 }
