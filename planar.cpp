@@ -25,6 +25,7 @@ graph* planar::check(graph& in){
 
     //checks if has cycle and fills first Cycle
     int *firstCycle;
+
     int firstCycleSize;
     if (!(in.cycled(&firstCycle,firstCycleSize)))
         return false;
@@ -34,11 +35,13 @@ graph* planar::check(graph& in){
 
     graph* ans = new graph(createCycled(in,firstCycle,firstCycleSize),firstCycleSize);
 
+    //ans->out();
+
     faces faceContainer;
     faceContainer.add(firstCycle,firstCycleSize);
     faceContainer.add(firstCycle,firstCycleSize);
 
-    faceContainer.out();
+    //faceContainer.out();
 
     return ans;
 

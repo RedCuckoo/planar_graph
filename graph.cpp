@@ -1,14 +1,22 @@
 #include "graph.h"
 #include "relVec.h"
 #include <string.h>
+#include <string>
 #include <fstream>
+#include <vector>
 
 graph::graph(size_t size, const char* filename){
+    static size_t id = 0;
+
     this->size_of_graph = size;
     graph_ver = new vertex* [size];
 
+    //create file matr*.txt where * is the id of the graph
     std::ofstream fmatr;
-    fmatr.open("matr.txt");
+    std::string fname = "matr";
+    fname += std::to_string(id++);
+    fname += ".txt";
+    fmatr.open(fname.c_str());
 
     relMatr matr (size);
 
@@ -20,6 +28,7 @@ graph::graph(size_t size, const char* filename){
         matr.fill(filename);
     }
 
+    //write out to a file
     for (size_t i = 0; i < size; i++){
         for (size_t j = 0; j < size; j++){
             fmatr<<matr.get_el(i,j)<<" ";
@@ -42,6 +51,27 @@ graph::graph(size_t size, const char* filename){
 graph::graph (vertex** ver, size_t size){
     graph_ver = ver;
     size_of_graph = size;
+
+    static size_t i = 0;
+    std::string fname = "matr";
+    std::ifstream fmatr_temp;
+    bool ex = true;
+    while (ex){
+        fname += std::to_string(i++);
+        fname += ".txt";
+        fmatr_temp.open(fname.c_str());
+        ex = fmatr_temp.good();
+        if (ex){
+            fmatr_temp.close();
+            fname = "matr";
+        }
+    }
+
+    std::ofstream fmatr;
+    fmatr.open (fname.c_str());
+
+    //write to fmatr
+
 }
 
 graph::~graph(){
@@ -57,6 +87,24 @@ void graph::out(){
     }
 }
 
+relMatr* graph::verToMatr(){
+    bool tempMatr[size_of_graph][size_of_graph];
+    relMatr* ans = new relMatr (size_of_graph);
+
+    //tempMatr is a 0 matrix
+    for (size_t i = 0; i < size_of_graph; i++)
+        for (size_t j = 0; j < size_of_graph; j++)
+            tempMatr[i][j] =0;
+
+    for (size_t i = 0; i < size_of_graph; i++){
+        for (size_t j = 0; j < graph_ver[i]->get_degree(); j++){
+
+
+        }
+    }
+
+}
+
 size_t graph::dfsConnectivity (vertex* cur){
     //size is the amount of vertexes
     static size_t counter = 0;
@@ -69,58 +117,108 @@ size_t graph::dfsConnectivity (vertex* cur){
     }
     return counter;
 }
+//bool graph::dfsCycle(vertex* cur, int** ans, int &size){
+//
+//    //find a cycle
+//    static int height = 0;
+//    static int height_MAX;
+//    static vertex* contr;
+//    static vertex* prev;
+//    static int* temp;
+//
+//    if (cur->white()){
+//        cur->col_gray();
+//        height++;
+//        for (size_t i = 0; i < cur->get_degree(); i++){
+//            if (prev == graph_ver[(*cur)[i]]){
+//                continue;
+//            }
+//            else{
+//                prev = cur;
+//            }
+//
+//
+//            if (dfsCycle(graph_ver[(*cur)[i]],ans,size)){
+//                temp [height] = cur->get_num();
+//                if (contr == cur){
+//                    size = height_MAX - height;
+//                    delete (*ans);
+//                    *ans  = new int[size--];
+//                    for (int j = height_MAX-1; j>=0 && size>=0;j--){
+//                        (*ans)[size--] = temp[j];
+//                    }
+//                    size = height_MAX - height;
+//                }
+//                height--;
+//                return true;
+//            }
+//        }
+//        height--;
+//        cur->col_black();
+//        return false;
+//    }
+//    else if (cur->gray()){
+//        delete temp;
+//        height_MAX = height;
+//        temp = new int [height--];
+//        contr = cur;
+//        return true;
+//    }
+//    else{
+//        return false;
+//    }
+//    return false;
+//}
 
-bool graph::dfsCycle(vertex* cur, int** ans, int &size){
-    //find a cycle
-    static int height = 0;
-    static int height_MAX;
-    static vertex* contr;
-    static vertex* prev;
-    static int* temp;
+bool graph::dfsCycle(vertex* cur, int** ans, int& size, bool first = 0, vertex* prev = nullptr){
+    static std::vector <int> ans_temp;
+
+    if (!first)
+        ans_temp.clear();
 
     if (cur->white()){
+        //we haven't been here
         cur->col_gray();
-        height++;
-        for (size_t i = 0; i < cur->get_degree(); i++){
-            if (prev == graph_ver[(*cur)[i]]){
-                continue;
+        for (int i = 0; i < cur->get_degree(); i++){
+            if (!prev || prev->get_num() != (*cur)[i]){
+                if (dfsCycle(graph_ver[(*cur)[i]],ans,size,1,graph_ver[cur->get_num()])){
+                    //if we know that there is a cycle
+                    ans_temp.push_back(cur->get_num());
+                    if (cur->get_num() == ans_temp[0]){
+                        //end of the recursion
+                        //ans_temp.remove();
+                        size = ans_temp.size() - 1;
+                        delete (*ans);
+                        (*ans) = new int [size];
+                        (*ans)[0] = ans_temp[0];
+                        int j = size-1;
+                        for (int i = 1; i < size; i++){
+                            (*ans)[i] = ans_temp[j--];
+                        }
+
+                    }
+                    //else{
+                        return true;
+
+                }
             }
             else{
-                prev = cur;
-            }
-
-
-            if (dfsCycle(graph_ver[(*cur)[i]],ans,size)){
-                temp [height] = cur->get_num();
-                if (contr == cur){
-                    size = height_MAX - height;
-                    delete (*ans);
-                    *ans  = new int[size--];
-                    for (int j = height_MAX-1; j>=0 && size>=0;j--){
-                        (*ans)[size--] = temp[j];
-                    }
-                    size = height_MAX - height;
-                }
-                height--;
-                return true;
+                continue;
             }
         }
-        height--;
         cur->col_black();
         return false;
     }
     else if (cur->gray()){
-        delete temp;
-        height_MAX = height;
-        temp = new int [height--];
-        contr = cur;
+        ans_temp.push_back(cur->get_num());
         return true;
     }
     else{
-        return false;
+
     }
     return false;
 }
+
 
 bool graph::connected(){
     return (dfsConnectivity(graph_ver[0]) == size_of_graph) ? true : false;
@@ -232,4 +330,9 @@ int** graph::find_bridges(){
     }
 
     return components;
+}
+
+graph* graph::difference(graph& to_subtract){
+ //  graph
+
 }
