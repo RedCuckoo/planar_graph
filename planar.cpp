@@ -1,5 +1,6 @@
 #include "planar.h"
 #include "face.h"
+#include "algorithm"
 
 vertex** planar::createCycled(graph& in, int* firstCycle, size_t firstCycleSize){
     /* firstCycle is an array of integers which has cycled vertexes in order
@@ -36,12 +37,13 @@ graph* planar::check(graph& in){
     graph* ans = new graph(createCycled(in,firstCycle,firstCycleSize),firstCycleSize);
 
     //ans->out();
-
+    std::sort (firstCycle, firstCycle+firstCycleSize);
     faces faceContainer;
+    //we are creating first two faces
     faceContainer.add(firstCycle,firstCycleSize);
     faceContainer.add(firstCycle,firstCycleSize);
 
-    //faceContainer.out();
+    faceContainer.out();
 
     return ans;
 

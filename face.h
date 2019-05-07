@@ -10,6 +10,7 @@ private:
     std::vector <size_t> ver;
     int num = -1;
 public:
+    //by number meant a unique id of the face/vertex
     face(size_t number_of_face);
     void add(size_t number_of_vertex);
     size_t size();

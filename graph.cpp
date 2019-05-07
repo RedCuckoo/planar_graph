@@ -4,17 +4,17 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 graph::graph(size_t size, const char* filename){
-    static size_t id = 0;
-
+    readID();
     this->size_of_graph = size;
     graph_ver = new vertex* [size];
 
     //create file matr*.txt where * is the id of the graph
     std::ofstream fmatr;
     std::string fname = "matr";
-    fname += std::to_string(id++);
+    fname += std::to_string(id);
     fname += ".txt";
     fmatr.open(fname.c_str());
 
@@ -49,28 +49,37 @@ graph::graph(size_t size, const char* filename){
 }
 
 graph::graph (vertex** ver, size_t size){
+    readID();
     graph_ver = ver;
     size_of_graph = size;
 
-    static size_t i = 0;
-    std::string fname = "matr";
-    std::ifstream fmatr_temp;
-    bool ex = true;
-    while (ex){
-        fname += std::to_string(i++);
-        fname += ".txt";
-        fmatr_temp.open(fname.c_str());
-        ex = fmatr_temp.good();
-        if (ex){
-            fmatr_temp.close();
-            fname = "matr";
-        }
-    }
+    //this->out();
 
-    std::ofstream fmatr;
-    fmatr.open (fname.c_str());
+    graph_sort();
+
+    //id = GRAPH_MAX_ID++;
+
+   // static size_t i = 0;
+ //   std::string fname = "matr";
+    //std::ifstream fmatr_temp;
+    //bool ex = true;
+    //while (ex){
+      //  fname += std::to_string(i++);
+  //      fname += std::to_string(id);
+    //    fname += ".txt";
+      //  fmatr_temp.open(fname.c_str());
+       // ex = fmatr_temp.good();
+        //if (ex){
+         //   fmatr_temp.close();
+          //  fname = "matr";
+        //}
+    //}
+
+   // std::ofstream fmatr;
+  //  fmatr.open (fname.c_str());
 
     //write to fmatr
+    verToMatr();
 
 }
 
@@ -87,20 +96,59 @@ void graph::out(){
     }
 }
 
+void graph::readID(){
+std::fstream fmaxID("GRAPH_MAX_ID.txt",std::ios::in);
+    if (fmaxID.good()){
+        fmaxID>>id;
+        fmaxID.close();
+        fmaxID.open("GRAPH_MAX_ID.txt", std::ios::out);
+        fmaxID<<id+1;
+    }
+    else{
+       // fmaxID.close();
+        fmaxID.open ("GRAPH_MAX_ID.txt", std::ios::out);
+        fmaxID<<1;
+        id = 0;
+    }
+    fmaxID.close();
+}
+
 relMatr* graph::verToMatr(){
-    bool tempMatr[size_of_graph][size_of_graph];
-    relMatr* ans = new relMatr (size_of_graph);
+    size_t size = graph_ver[size_of_graph-1]->get_num()+1;
+    bool tempMatr[size][size];
+    relMatr* ans = new relMatr (size);
 
-    //tempMatr is a 0 matrix
-    for (size_t i = 0; i < size_of_graph; i++)
-        for (size_t j = 0; j < size_of_graph; j++)
-            tempMatr[i][j] =0;
+    std::string fname = "matr";
+    fname += std::to_string(id);
+    fname += ".txt";
+    std::ofstream fmatr (fname.c_str());//, std::ios::out);
 
-    for (size_t i = 0; i < size_of_graph; i++){
-        for (size_t j = 0; j < graph_ver[i]->get_degree(); j++){
+    size_t temp_i = 0;
+    size_t temp_j = 0;
 
+    for (size_t i = 0; i < size; i++){
+        for (size_t j = 0; j < size; j++){
+            if (temp_i < size_of_graph && temp_j < graph_ver[temp_i]->get_degree()){
+                if (graph_ver[temp_i]->get_num() == i && (*graph_ver[temp_i])[temp_j] == j){
+                        if (++temp_j >= graph_ver[temp_i]->get_degree()){
+                            temp_j = 0;
+                            temp_i++;
+                        }
+                        tempMatr[i][j] = 1;
+                        fmatr<<1<<" ";
+                }
+                else{
+                    tempMatr[i][j] = 0;
+                    fmatr<<0<<" ";
+                }
+            }
+            else{
+                tempMatr[i][j] = 0;
+                fmatr<<0<<" ";
 
+            }
         }
+        fmatr<<'\n';
     }
 
 }
@@ -117,58 +165,6 @@ size_t graph::dfsConnectivity (vertex* cur){
     }
     return counter;
 }
-//bool graph::dfsCycle(vertex* cur, int** ans, int &size){
-//
-//    //find a cycle
-//    static int height = 0;
-//    static int height_MAX;
-//    static vertex* contr;
-//    static vertex* prev;
-//    static int* temp;
-//
-//    if (cur->white()){
-//        cur->col_gray();
-//        height++;
-//        for (size_t i = 0; i < cur->get_degree(); i++){
-//            if (prev == graph_ver[(*cur)[i]]){
-//                continue;
-//            }
-//            else{
-//                prev = cur;
-//            }
-//
-//
-//            if (dfsCycle(graph_ver[(*cur)[i]],ans,size)){
-//                temp [height] = cur->get_num();
-//                if (contr == cur){
-//                    size = height_MAX - height;
-//                    delete (*ans);
-//                    *ans  = new int[size--];
-//                    for (int j = height_MAX-1; j>=0 && size>=0;j--){
-//                        (*ans)[size--] = temp[j];
-//                    }
-//                    size = height_MAX - height;
-//                }
-//                height--;
-//                return true;
-//            }
-//        }
-//        height--;
-//        cur->col_black();
-//        return false;
-//    }
-//    else if (cur->gray()){
-//        delete temp;
-//        height_MAX = height;
-//        temp = new int [height--];
-//        contr = cur;
-//        return true;
-//    }
-//    else{
-//        return false;
-//    }
-//    return false;
-//}
 
 bool graph::dfsCycle(vertex* cur, int** ans, int& size, bool first = 0, vertex* prev = nullptr){
     static std::vector <int> ans_temp;
@@ -286,6 +282,13 @@ int* graph::dfsBridgesOrienting(vertex** cur){
 }
 
 int* graph::findBridgeCycle(vertex** cur){
+
+    /*!!!!!!!!!!!!!!!!!!!!!!
+        remake it by subtracting elements from the vertexes
+        not the matrix
+        !!!!*/
+
+
     //cur is NOT visited vertex
     static int* component = new int [size_of_graph];
     static int counter = 0;
@@ -332,7 +335,115 @@ int** graph::find_bridges(){
     return components;
 }
 
-graph* graph::difference(graph& to_subtract){
- //  graph
+size_t graph::get_id(){
+    return id;
+}
 
+graph* graph::difference(graph& to_subtract){
+    //be careful, you have to enter correct sizes
+
+    //size - is the biggest possible graph
+    //size_of_graph - is the actual amount of vertexes
+    size_t size;// = graph_ver[size_of_graph-1]->get_num()+1;
+    size = graph_ver[size_of_graph-1]->get_num()+1;
+
+
+    std::string fname = "matr";
+    fname += std::to_string(id);
+    fname += ".txt";
+
+    std::fstream cur (fname.c_str(), std::ios::in);
+    size_t tempMatr[size][size];
+    for (size_t i = 0; i < size; i ++){
+        for (size_t j = 0; j < size; j++){
+            cur>>tempMatr[i][j];
+        }
+    }
+    cur.close();
+
+    fname = "matrtemp.txt";
+    cur.open (fname.c_str(), std::ios::out);
+
+    fname = "matr";
+    fname += std::to_string(to_subtract.get_id());
+    fname += ".txt";
+
+    std::fstream sub (fname.c_str(),std::ios::in);
+
+    size_t temp;
+    for (size_t i = 0; i < size; i++){
+        for (size_t j = 0; j < size; j++){
+            sub>>temp;
+            if (temp == tempMatr[i][j] == 1){
+                cur<<0<<" ";
+            }
+            else{
+                cur<<tempMatr[i][j]<<" ";
+            }
+        }
+        cur<<"\n";
+    }
+
+    cur.close();
+    sub.close();
+
+    graph* ans = new graph (size, "matrtemp.txt");
+    remove ("matrtemp.txt");
+    return ans;
+}
+
+void graph::graph_sort(){
+    //sorts the array of vertex* (graph_ver) in the graph
+    std::vector <size_t> work;
+    vertex** temp = new vertex* [size_of_graph];
+
+
+    for (size_t i = 0; i < size_of_graph; i++){
+        temp[i] = graph_ver[i];
+    }
+
+    for (size_t  i = 0; i < size_of_graph; i++){
+        work.push_back (graph_ver[i]->get_num());
+    }
+
+
+    std::sort(work.begin(), work.end());
+
+    for (size_t i = 0; i < size_of_graph; i++){
+        graph_ver[i] = temp[graph_find(temp, size_of_graph,work[i])];
+
+    }
+
+}
+
+size_t graph::graph_find (vertex** where, size_t size, size_t number){
+    //returns the index of the num
+    for (int i = 0; i < size; i++){
+        if (where[i]->get_num() == number)
+            return i;
+    }
+    return -1;
+}
+
+void graph_clear(){
+    std::fstream toDel ("GRAPH_MAX_ID.txt", std::ios::in);
+    size_t maxID;
+
+    if (toDel.good()){
+        toDel>>maxID;
+    }
+    else{
+        maxID = 0;
+    }
+
+    toDel.close();
+    remove ("GRAPH_MAX_ID.txt");
+
+    std::string fname = "matr";
+    for (size_t i = 0; i < maxID; i++){
+        fname += std::to_string (i);
+        fname += ".txt";
+        remove (fname.c_str());
+        fname = "matr";
+    }
 }

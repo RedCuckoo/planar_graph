@@ -9,6 +9,10 @@
 
 //matr*.txt will hold a relativity matrix after initialization
 
+//GRAPH_MAX_ID.bin will hold the maximum +  value
+
+//all the working graphs automatically have the same dimensions
+
 class graph{
 private:
     size_t id;
@@ -18,7 +22,7 @@ private:
     size_t dfsConnectivity (vertex* cur);
     bool dfsCycle(vertex* cur, int** ans, int &size, bool first, vertex* prev);
    // bool dfsCycle(vertex* cur,  int** ans, int &size, int height);
-
+    void readID();
     void clearTemp();
     bool petel;
     bool petels(relMatr &matr);
@@ -61,6 +65,15 @@ public:
 
     //returns an array of different parts of graph without bridges
     int** find_bridges();
+
+    size_t get_id();
+
+    void graph_sort ();
+
+    size_t graph_find (vertex** where, size_t size, size_t number);
+
 };
+
+void graph_clear();
 
 #endif // GRAPH_H
