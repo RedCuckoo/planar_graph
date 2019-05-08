@@ -85,9 +85,11 @@ graph::graph (vertex** ver, size_t size){
 
 graph::~graph(){
     for (size_t i = 0; i < size_of_graph; i++){
-        delete graph_ver[i];
+        if (!graph_ver[i])
+            delete graph_ver[i];
     }
-    delete graph_ver;
+    if (!graph_ver)
+        delete graph_ver;
 }
 
 void graph::out(){
@@ -344,9 +346,10 @@ graph* graph::difference(graph& to_subtract){
 
     //size - is the biggest possible graph
     //size_of_graph - is the actual amount of vertexes
-    size_t size;// = graph_ver[size_of_graph-1]->get_num()+1;
-    size = graph_ver[size_of_graph-1]->get_num()+1;
+    size_t size = graph_ver[size_of_graph-1]->get_num()+1;
+    //size = graph_ver[size_of_graph-1]->get_num()+1;
 
+    size_t size_to_subtract = to_subtract[to_subtract.size()-1]->get_num()+1;
 
     std::string fname = "matr";
     fname += std::to_string(id);
@@ -373,12 +376,18 @@ graph* graph::difference(graph& to_subtract){
     size_t temp;
     for (size_t i = 0; i < size; i++){
         for (size_t j = 0; j < size; j++){
-            sub>>temp;
-            if (temp == tempMatr[i][j] == 1){
-                cur<<0<<" ";
+            if (i<size_to_subtract && j<size_to_subtract){
+                sub>>temp;
+                if (temp == tempMatr[i][j] == 1){
+                    cur<<0<<" ";
+                }
+                else{
+                    cur<<tempMatr[i][j]<<" ";
+                }
             }
             else{
                 cur<<tempMatr[i][j]<<" ";
+
             }
         }
         cur<<"\n";

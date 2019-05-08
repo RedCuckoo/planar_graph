@@ -6,7 +6,8 @@ relVec::relVec(size_t am){
 }
 
 relVec::~relVec(){
-    delete rows;
+    if (!rows)
+        delete rows;
 }
 
 unsigned relVec::rowToNum (relMatr &work, int i){

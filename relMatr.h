@@ -17,6 +17,7 @@ public:
     void fill ();
     void fill (const char* filename);
     void out() ;
+    void out(const char* filename) ;
     ~relMatr();
 };
 

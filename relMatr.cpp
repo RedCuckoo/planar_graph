@@ -56,9 +56,21 @@ void relMatr::out (){
     }
 }
 
+void relMatr::out (const char* filename){
+    std::ofstream fmatr (filename);
+    for (size_t i = 0; i< amount; i++){
+        for (size_t j = 0; j < amount; j++){
+            fmatr<<matr[i][j]<<" ";
+        }
+        fmatr<<std::endl;
+    }
+}
+
 relMatr::~relMatr(){
     for (size_t i = 0; i < amount; i++){
-        delete matr[i];
-       }
-    delete matr;
+        if (!matr[i])
+            delete matr[i];
+    }
+    if (!matr)
+        delete matr;
 }
