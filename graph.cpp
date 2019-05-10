@@ -84,6 +84,7 @@ graph::graph (vertex** ver, size_t size){
 }
 
 graph::~graph(){
+    //DELETE FILES
     for (size_t i = 0; i < size_of_graph; i++){
         if (!graph_ver[i])
             delete graph_ver[i];
@@ -248,9 +249,12 @@ vertex** graph::get_vertexes(){
     return graph_ver;
 }
 
-void graph::operator=(graph& a){
-    this->size_of_graph = a.size();
-    this->graph_ver = a.get_vertexes();
+graph graph::operator=(graph& a){
+    //this->size_of_graph = a.size();
+    //this->graph_ver = a.get_vertexes();
+    //this->id = a.get_id();
+    graph work(a.get_vertexes(),a.size());
+    return work;
 }
 
 vertex* graph::operator[](size_t i){
@@ -346,6 +350,7 @@ graph* graph::difference(graph& to_subtract){
 
     //size - is the biggest possible graph
     //size_of_graph - is the actual amount of vertexes
+    to_subtract.out();
     size_t size = graph_ver[size_of_graph-1]->get_num()+1;
     //size = graph_ver[size_of_graph-1]->get_num()+1;
 

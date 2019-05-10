@@ -80,6 +80,18 @@ bool vertex::visited(){
     return temp;
 }
 
+void vertex::set_contact(){
+    set_visited();
+}
+
+void vertex::del_contact(){
+    set_blank();
+}
+
+bool vertex::contact(){
+    return temp;
+}
+
 size_t vertex::get_num(){
     return num;
 }

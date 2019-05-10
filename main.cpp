@@ -26,14 +26,17 @@ int main()
 //    test.out();
 
     int* temp = new int [3];
-    test.cycled(&temp,s);
+   if ( test.cycled(&temp,s)){
     //test.cycled(&temp,s);
 
-    std::cout<<s<<'\n';
-    for (int i = 0; i < s; i++){
-       cout<<temp[i]<<" ";
-    }
-
+        std::cout<<s<<'\n';
+        for (int i = 0; i < s; i++){
+           cout<<temp[i]<<" ";
+        }
+   }
+   else{
+        std::cout<<"NOT CYCLED";
+   }
     cout<<endl;
     //cout<<test.connected()<<" "<<test.petels();
     graph *n = planar::check(test);

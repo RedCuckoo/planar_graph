@@ -58,7 +58,7 @@ public:
     size_t size();
     vertex** get_vertexes();
 
-    void operator= (graph& a);
+    graph operator= (graph& a);
     vertex* operator[] (size_t i);
 
     graph* difference (graph& to_subtract);

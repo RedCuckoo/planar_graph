@@ -4,6 +4,13 @@
 #include "relMatr.h"
 #include "relVec.h"
 
+std::string planar::genfname (size_t id){
+    std::string fname = "matr";
+    fname += std::to_string (id);
+    fname += ".txt";
+    return fname;
+}
+
 vertex** planar::createCycled(graph& in, int* firstCycle, size_t firstCycleSize){
     /* firstCycle is an array of integers which has cycled vertexes in order
         firstCycleSize is the length of the cycle, >2
@@ -29,8 +36,38 @@ faces* planar::initialize(int* firstCycle, int firstCycleSize){
     return faceContainer;
 }
 
+segment* planar::type1_segment (graph& main,graph* difference, int* firstCycle, int firstCycleSize){
+    segment* ans = new segment;
+
+    relMatr workMatr(difference->size());
+    workMatr.fill(genfname(difference->get_id()).c_str());
+workMatr.out();
+    for (size_t i = 0; i < firstCycleSize; i++){
+        for (size_t j = i+1; j < firstCycleSize; j++){
+            if (workMatr.get_el(main[firstCycle[i]]->get_num(),main[firstCycle[j]]->get_num())){
+                //if they are connected
+                ans->add(main,firstCycle[i], firstCycle[j]);
+                ans->out();
+            }
+        }
+    }
+    size_t temp = ans->size();
+    ans[0].out();
+   // ans->out();
+    return ans;
+}
+void planar::type2_segment (segment* const cont, graph& main, graph* difference, std::vector<size_t>idsToDif){
+    graph work = *difference;
+    std::cout<<idsToDif.size()<<" "<<(*cont)[0]->get_id()<<" "<<main.get_id()<<" "<<work.get_id();
+    (*cont)[0]->out();
+    for (size_t i = 0; i < idsToDif.size(); i++){
+        work = *work.difference(*((*cont)[i]));
+    }
+}
+
 graph* planar::check(graph& in){
     //checks if graph is connected
+
     if (!(in.connected()))
         return false;
 
@@ -61,31 +98,11 @@ graph* planar::check(graph& in){
     graph* work = in.difference(*plane);
     int work_id = work->get_id();
 
-
-
-    relMatr workMatr(work->size());
-    std::string fname = "matr";
-    fname += std::to_string (work->get_id());
-    fname += ".txt";
-    workMatr.fill(fname.c_str());
-
-
     segment* seg_cont = new segment;
-    //seg_cont->add(in,1,2);
 
-    workMatr.out();
-
-    for (size_t i = 0; i < firstCycleSize; i++){
-        for (size_t j = i+1; j < firstCycleSize; j++){
-            work_id = workMatr.get_el(in[firstCycle[i]]->get_num(),in[firstCycle[j]]->get_num());
-            int temp1 = in[firstCycle[i]]->get_num();
-            int temp2 = in[firstCycle[j]]->get_num();
-            if (workMatr.get_el(in[firstCycle[i]]->get_num(),in[firstCycle[j]]->get_num())){
-                //if they are connected
-                seg_cont->add(in,firstCycle[i], firstCycle[j]);
-            }
-        }
-    }
+    seg_cont = type1_segment(in,work,firstCycle, firstCycleSize);
+        (*seg_cont).out();
+    type2_segment(seg_cont,in,work,*seg_cont->last_ids());
 
 std::cout<<"!\n";
     seg_cont->out();

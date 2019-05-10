@@ -31,6 +31,9 @@ public:
     bool black();
     bool white();
     bool visited();
+    void set_contact();
+    void del_contact();
+    bool contact();
     size_t get_degree();
     size_t get_num();
     void out();
