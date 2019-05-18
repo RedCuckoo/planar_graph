@@ -14,13 +14,14 @@ private:
     //degree of this vertex
     size_t degree;
 
-    bool temp;
+    bool temp = 0;
     size_t color = 0;
 
 public:
 
     vertex(relVec &work, size_t number);
     vertex (size_t number, size_t firstVertex, size_t secondVertex);
+    vertex (vertex& to_copy);
     ~vertex();
     void set_visited ();
     void set_blank();
@@ -41,6 +42,7 @@ public:
 
     //returns vertexes connected to the current
     size_t operator[] (size_t i);
+    bool operator== (vertex& to_check);
 };
 
 #endif // VERTEX_H

@@ -1,30 +1,48 @@
 #include "face.h"
 
-face::face(size_t number_of_face){
+faces::face::face(size_t number_of_face){
     num = number_of_face;
 }
 
-void face::add(size_t number_of_vertex){
+void faces::face::add(size_t number_of_vertex){
     ver.push_back(number_of_vertex);
 }
 
-size_t face::operator[](size_t i){
+size_t faces::face::operator[](size_t i){
     return ver[i];
 }
 
-size_t face::size(){
+size_t faces::face::size(){
     return ver.size();
 }
 
-int face::get_num(){
+int faces::face::get_num(){
     return num;
 }
 
-void face::set_num (size_t number_of_face){
+void faces::face::set_num (size_t number_of_face){
     num = number_of_face;
 }
 
-void face::out(){
+bool faces::face::belong(graph& to_check){
+    size_t counter = 0;
+    for (size_t i = 0; i < to_check.size(); i++){
+        //for every vertex
+        if (to_check[i]->contact()){
+            //if the vertex is contact
+            for (size_t j = 0; j < ver.size(); j++){
+                //for every vertex in a faceContainer
+                if (to_check[i]->get_num() == ver[j]){
+                    //if equal to some of the vertex
+                    counter++;
+                }
+            }
+        }
+    }
+    return (counter == to_check.size()) ? true : false;
+}
+
+void faces::face::out(){
     std::cout<<num<<" : ";
     for (size_t i = 0; i < ver.size(); i++){
         std::cout<<ver[i]<<" ";
@@ -32,7 +50,7 @@ void face::out(){
     std::cout<<std::endl;
 }
 
-void faces::add (face face_to_add){
+void faces::add (faces::face face_to_add){
     face_to_add.set_num(container.size());
     container.push_back(face_to_add);
 }
@@ -55,6 +73,6 @@ void faces::out(){
     }
 }
 
-face faces::operator[](size_t i){
+faces::face faces::operator[](size_t i){
     return container[i];
 }

@@ -50,46 +50,34 @@ graph::graph(size_t size, const char* filename){
 
 graph::graph (vertex** ver, size_t size){
     readID();
-    graph_ver = ver;
+
+    graph_ver = new vertex* [size];
+    for(size_t i = 0; i < size; ++i){
+        graph_ver[i] = new vertex(*ver[i]);
+    }
+
     size_of_graph = size;
 
-    //this->out();
-
     graph_sort();
-
-    //id = GRAPH_MAX_ID++;
-
-   // static size_t i = 0;
- //   std::string fname = "matr";
-    //std::ifstream fmatr_temp;
-    //bool ex = true;
-    //while (ex){
-      //  fname += std::to_string(i++);
-  //      fname += std::to_string(id);
-    //    fname += ".txt";
-      //  fmatr_temp.open(fname.c_str());
-       // ex = fmatr_temp.good();
-        //if (ex){
-         //   fmatr_temp.close();
-          //  fname = "matr";
-        //}
-    //}
-
-   // std::ofstream fmatr;
-  //  fmatr.open (fname.c_str());
-
-    //write to fmatr
     verToMatr();
+}
 
+graph::graph(vertex* ver){
+    readID();
+    graph_ver = new vertex* [1];
+    graph_ver[0] = ver;
+    size_of_graph = 1;
+    graph_sort();
+    verToMatr();
 }
 
 graph::~graph(){
     //DELETE FILES
     for (size_t i = 0; i < size_of_graph; i++){
-        if (!graph_ver[i])
+        if (graph_ver[i])
             delete graph_ver[i];
     }
-    if (!graph_ver)
+    if (graph_ver)
         delete graph_ver;
 }
 
@@ -249,12 +237,17 @@ vertex** graph::get_vertexes(){
     return graph_ver;
 }
 
-graph graph::operator=(graph& a){
-    //this->size_of_graph = a.size();
-    //this->graph_ver = a.get_vertexes();
-    //this->id = a.get_id();
-    graph work(a.get_vertexes(),a.size());
-    return work;
+void graph::operator=(graph& a){
+    this->graph::~graph();
+    readID();
+
+    graph_ver = new vertex* [a.size()];
+    for(size_t i = 0; i < a.size(); ++i){
+        graph_ver[i] = new vertex(*a[i]);
+    }
+
+    size_of_graph = a.size();
+    verToMatr();
 }
 
 vertex* graph::operator[](size_t i){
@@ -350,9 +343,8 @@ graph* graph::difference(graph& to_subtract){
 
     //size - is the biggest possible graph
     //size_of_graph - is the actual amount of vertexes
-    to_subtract.out();
+    //to_subtract.out();
     size_t size = graph_ver[size_of_graph-1]->get_num()+1;
-    //size = graph_ver[size_of_graph-1]->get_num()+1;
 
     size_t size_to_subtract = to_subtract[to_subtract.size()-1]->get_num()+1;
 
@@ -401,7 +393,7 @@ graph* graph::difference(graph& to_subtract){
     cur.close();
     sub.close();
 
-    graph* ans = new graph (size, "matrtemp.txt");
+    graph *ans = new graph (size, "matrtemp.txt");
     remove ("matrtemp.txt");
     return ans;
 }

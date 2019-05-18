@@ -23,15 +23,30 @@ vertex::vertex(relVec &work, size_t number){
 vertex::vertex (size_t number, size_t firstVertex, size_t secondVertex){
     degree = 2;
     num = number;
-
     next_num = new size_t [degree];
 
     next_num[0] = (firstVertex<secondVertex) ? firstVertex : secondVertex;
     next_num[1] = (firstVertex>secondVertex) ? firstVertex : secondVertex;
 }
 
+vertex::vertex(vertex& to_copy){
+    degree = to_copy.get_degree();
+    num = to_copy.get_num();
+    next_num = new size_t [degree];
+    temp = to_copy.contact();
+
+    for (size_t i = 0; i < degree; i++){
+        next_num[i] = to_copy[i];
+    }
+}
+
 void vertex::out(){
-    std::cout<<"DEG: "<<degree<<" NUM: "<<num<<std::endl;
+    std::cout<<"DEG: "<<degree<<" CONTACT: ";
+    if (contact())
+        std::cout<<"YAS";
+    else
+        std::cout<<"NO";
+    std::cout<<" NUM: "<<num<<std::endl;
     std::cout<<"NEXT VERTICES: ";
     for (size_t i = 0; i < degree;i++){
         std::cout<<next_num[i]<<" ";
@@ -98,6 +113,10 @@ size_t vertex::get_num(){
 
 size_t vertex::operator[] (size_t i){
     return next_num[i];
+}
+
+bool vertex::operator== (vertex& to_check){
+    return (num == to_check.get_num()) ? true : false;
 }
 
 size_t vertex::get_degree(){

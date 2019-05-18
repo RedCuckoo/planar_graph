@@ -17,7 +17,7 @@ class graph{
 private:
     size_t id;
     //size - amount of vertexes
-    size_t size_of_graph;
+    size_t size_of_graph = 0;
     vertex** graph_ver;
     size_t dfsConnectivity (vertex* cur);
     bool dfsCycle(vertex* cur, int** ans, int &size, bool first, vertex* prev);
@@ -43,6 +43,7 @@ public:
     void clearMarks();
     graph (size_t size, const char* filename = "");
     graph (vertex** ver, size_t size);
+    graph (vertex* ver);
     ~graph();
     void out ();
 
@@ -58,7 +59,7 @@ public:
     size_t size();
     vertex** get_vertexes();
 
-    graph operator= (graph& a);
+    void operator= (graph& a);
     vertex* operator[] (size_t i);
 
     graph* difference (graph& to_subtract);
