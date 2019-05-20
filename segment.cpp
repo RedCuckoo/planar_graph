@@ -1,7 +1,7 @@
 #include "segment.h"
+#include "planar.h"
 
-
-vertex** segment::create2 (graph& in, size_t num_of_ver1, size_t num_of_ver2){
+vertex** segments::segment::create2 (graph& in, size_t num_of_ver1, size_t num_of_ver2){
     vertex** temp = new vertex* [2];
 
     temp[0] = in[in.graph_find(in.get_vertexes(),in.size(),num_of_ver1)];
@@ -14,47 +14,36 @@ vertex** segment::create2 (graph& in, size_t num_of_ver1, size_t num_of_ver2){
     return temp;
 }
 
-void segment::add (graph& in, int* firstCycle, size_t firstCycleSize){
-    //adds a graph, marking contact vertexes
-    push_back();
+segments::segment::segment (size_t id, graph& in, int* firstCycle, size_t firstCycleSize){
+   //adds a graph, marking contact vertexes
+    this->id = id;
     in.graph_sort();
     for (size_t i = 0; i < firstCycleSize; i++){
         in[firstCycle[i]]->set_contact();
     }
-
-    container[amount-1] = new graph(in.get_vertexes(),in.size());
+    segm = new graph(in.get_vertexes(),in.size());
 }
 
-void segment::add (graph& in,size_t num_of_ver1, size_t num_of_ver2){
+segments::segment::segment (size_t id, graph& in,size_t num_of_ver1, size_t num_of_ver2){
+    this->id = id;
     vertex** temp = create2(in,num_of_ver1,num_of_ver2);
-    push_back();
-    container[amount-1] = new graph(temp,2);
+    segm = new graph(temp,2);
 }
 
-void segment::out(){
-    for (size_t i = 0; i < amount; i++){
-        container[i]->out();
-        std::cout<<"\n";
-    }
+graph* segments::segment::get_graph(){
+    return segm;
 }
 
-std::vector<size_t> segment::last_ids(){
-    //returns ids of the segments
-    std::vector<size_t> ans;
-    if (amount){
-        for (size_t i = 0 ; i < amount; i++){
-            ans.push_back(container[i]->get_id());
-        }
-    }
-
-    return ans;
+size_t segments::segment::get_faceAmount(){
+    return faceAmount;
 }
 
-graph* segment::operator[](size_t i){
-    return container[i];
+void segments::segment::out(){
+    std::cout<<"ID: "<<id<<" | face_amount: "<<faceAmount<<'\n';
+    segm->out();
 }
 
-void segment::clearFromExtra(vertex** in, size_t to_skip){
+void segments::segment::clearFromExtra(vertex** in, size_t to_skip){
     for (size_t i = 0; i < (*in)->get_degree(); i++){
         if ((**in)[i] != to_skip){
             (*in)->delNext((**in)[i--]);
@@ -62,74 +51,65 @@ void segment::clearFromExtra(vertex** in, size_t to_skip){
     }
 }
 
-void segment::delGgraph(graph** del, size_t size){
-    for (size_t i = 0; i < size; i++){
-        if (del[i]){
-            delete del[i];
+size_t segments::size(){
+    return container.size();
+}
+
+void segments::out(){
+    for (size_t i = 0; i < container.size(); i++){
+        container[i].out();
+    }
+}
+
+segments::segment* segments::operator[](size_t i){
+    //i is the id of the segment
+    return &container[i];
+}
+
+void segments::add(graph& in, size_t num_of_ver1, size_t num_of_ver2){
+    segment temp(container.size(),in, num_of_ver1, num_of_ver2);
+    container.push_back(temp);
+}
+
+void segments::add(graph& in, int* firstCycle, size_t firstCycleSize){
+    segment temp(container.size(),in, firstCycle, firstCycleSize);
+    container.push_back(temp);
+}
+
+
+void segments::type1_segment (graph& main, graph* difference, int* firstCycle, int firstCycleSize){
+    relMatr workMatr(difference->size());
+    workMatr.fill(planar::genfname(difference->get_id()).c_str());
+
+    for (int i = 0; i < firstCycleSize; i++){
+        for (int j = i+1; j < firstCycleSize; j++){
+            if (workMatr.get_el(main[firstCycle[i]]->get_num(),main[firstCycle[j]]->get_num())){
+                //if they are connected
+                add(main,firstCycle[i], firstCycle[j]);
+            }
         }
     }
 }
 
-size_t segment::size(){
-    return amount;
-}
-
-size_t segment::faces_size(){
-    return facesAmount;
-}
-
-void segment::push_back(graph* to_add){
-    //adds to a container
-    if (!container){
-        container = new graph*;
-        *container = new graph(to_add->get_vertexes(),to_add->size());
-        amount++;
+void segments::type2_segment (graph& main, graph* difference, int* firstCycle, size_t firstCycleSize){
+    graph work = *difference;
+    for (size_t i = 0; i < container.size(); i++){
+        work = *(work.difference(*(container[i].get_graph())));
     }
-    else{
-        graph** temp = new graph* [amount];
-        for (size_t i = 0; i < amount; i++){
-            temp[i] = container[i];
+    add(work,firstCycle,firstCycleSize);
+}
+
+void segments::segment::calcFacesBelong(faces& faceContainer){
+    faceAmount = 0;
+    for (size_t j = 0; j < faceContainer.size(); j++){
+        if (faceContainer.belong(*segm)){
+            faceAmount++;
         }
-        delGgraph(container,amount);
-
-        container = new graph* [++amount];
-        for (size_t i = 0; i < amount-1;i++)
-            container[i] = temp[i];
-
-        container [amount-1] = new graph(to_add->get_vertexes(),to_add->size());
-
-        delGgraph(temp,amount-1);
     }
 }
 
-void segment::push_back(){
-    //increasing the size of the container by 1
-    if (!container){
-        container = new graph*;
-        amount++;
+void segments::calcFacesBelong(faces& faceContainer){
+    for (size_t i = 0; i < container.size(); i++){
+        container[i].calcFacesBelong(faceContainer);
     }
-    else{
-        graph** temp = new graph* [amount];
-
-         for (size_t i = 0; i < amount; i++){
-            temp[i] = new graph(container[i]->get_vertexes(), container[i]->size());
-        }
-
-        delGgraph(container,amount);
-
-        container = new graph* [++amount];
-        for (size_t i = 0; i < amount-1;i++)
-            container[i] = new graph(temp[i]->get_vertexes(),temp[i]->size());
-
-        delGgraph(temp,amount-1);
-    }
-}
-
-void segment::checkAndAddFaces(faces& to_check){
-    for (size_t i = 0; i < to_check.size(); i++){
-
-
-    }
-
-
 }

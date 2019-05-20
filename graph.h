@@ -28,11 +28,6 @@ private:
     bool petels(relMatr &matr);
 
     relMatr* verToMatr();
-
-    struct bridge{
-        vertex* b,e;
-    };
-
 public:
     //orienting graph with dfs, to search for bridges
     int* dfsBridgesOrienting(vertex** cur);
@@ -41,6 +36,7 @@ public:
 
     //clears all marks such as colors and visiting
     void clearMarks();
+    void clearColor();
     graph (size_t size, const char* filename = "");
     graph (vertex** ver, size_t size);
     graph (vertex* ver);
@@ -73,6 +69,9 @@ public:
 
     size_t graph_find (vertex** where, size_t size, size_t number);
 
+    bool findWay (vertex* cur, std::vector<int>& ans, bool first = 0, vertex* prev = nullptr);
+
+    void findWayBtwContact(vertex** ans);
 };
 
 void graph_clear();

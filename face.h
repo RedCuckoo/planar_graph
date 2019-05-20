@@ -19,18 +19,19 @@ public:
         void add(size_t number_of_vertex);
         size_t size();
         int get_num();
+        bool findif (size_t i);
         void set_num (size_t number_of_face);
         bool belong (graph& to_check);
         void out();
         size_t operator[](size_t i);
     };
-
+    bool belong (graph& to_check);
     faces() = default;
     void add (face face_to_add);
     void add (int* num_of_vertexes_to_add, size_t amount);
     size_t size();
     void out();
-    face operator[](size_t i);
+    face* operator[](size_t i);
 private:
     std::vector <face> container;
 };

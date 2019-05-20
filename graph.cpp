@@ -261,6 +261,12 @@ void graph::clearMarks(){
     }
 }
 
+void graph::clearColor(){
+    for (size_t i = 0; i < size_of_graph; i++){
+        graph_ver[i]->col_white();
+    }
+}
+
 int* graph::dfsBridgesOrienting(vertex** cur){
     static int* order = new int [size_of_graph];
     static int counter = 0;
@@ -451,5 +457,72 @@ void graph_clear(){
         fname += ".txt";
         remove (fname.c_str());
         fname = "matr";
+    }
+}
+
+
+bool graph::findWay(vertex* cur, std::vector<int>& ans, bool first, vertex* prev){
+    //in order to find a vertex you need to:
+    //cur - the first one, and the one you need to find is colored with gray
+
+      //  out();
+
+    if (!first){
+        ans.clear();
+        ans.push_back(cur->get_num());
+    }
+
+    if (cur->white()){
+           // cur->out();
+        //we haven't been here
+        cur->col_gray();
+        for (int i = 0; i < cur->get_degree(); i++){
+            if (!prev || prev->get_num() != (*cur)[i]){
+                if (findWay(graph_ver[graph_find(graph_ver,size_of_graph,(*cur)[i])],ans,1,graph_ver[cur->get_num()])){
+                    ans.push_back(cur->get_num());
+                    if (cur->get_num() == ans[0]){
+                        ans.erase (ans.begin());
+                        reverse (ans.begin(),ans.end());
+                    }
+                    return true;
+                }
+            }
+            else{
+                continue;
+            }
+        }
+        cur->col_black();
+        return false;
+    }
+    else if (cur->gray()){
+        ans.push_back(cur->get_num());
+        return true;
+    }
+    else{
+
+    }
+    return false;
+}
+
+void graph::findWayBtwContact(vertex** ans){
+    vertex* one = nullptr,* two = nullptr;
+    for (size_t i = 0; i < size(); i++){
+        if (graph_ver[i]->contact()){
+            if (!one){
+                one = graph_ver[i];
+            }
+            else{
+                two = graph_ver[i];
+                break;
+            }
+        }
+    }
+
+    clearColor();
+    two->col_gray();
+    std::vector<int> way;
+    findWay(one,way);
+    for (size_t i = 0; i < way.size(); i++){
+        std::cout<<way[i]<<" ";
     }
 }

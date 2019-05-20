@@ -36,33 +36,6 @@ faces* planar::initialize(int* firstCycle, int firstCycleSize){
     return faceContainer;
 }
 
-segment* planar::type1_segment (graph& main,graph* difference, int* firstCycle, int firstCycleSize){
-    segment* ans = new segment;
-
-    relMatr workMatr(difference->size());
-    workMatr.fill(genfname(difference->get_id()).c_str());
-
-    for (int i = 0; i < firstCycleSize; i++){
-        for (int j = i+1; j < firstCycleSize; j++){
-            if (workMatr.get_el(main[firstCycle[i]]->get_num(),main[firstCycle[j]]->get_num())){
-                //if they are connected
-                ans->add(main,firstCycle[i], firstCycle[j]);
-            }
-        }
-    }
-    return ans;
-}
-
-void planar::type2_segment (segment* cont, graph& main, graph* difference, int* firstCycle, size_t firstCycleSize){
-    graph work = *difference;
-    for (size_t i = 0; i < cont->size(); i++){
-        //(*cont)[i]->out();
-        work = *(work.difference(*((*cont)[i])));
-
-    }
-    cont->add(work,firstCycle,firstCycleSize);
-}
-
 graph* planar::check(graph& in){
     //checks if graph is connected
 
@@ -97,13 +70,17 @@ graph* planar::check(graph& in){
     graph* work = in.difference(*plane);
     //int work_id = work->get_id();
 
-    segment* seg_cont = new segment;
+    segments* seg_cont = new segments;
 
-    seg_cont = type1_segment(in,work,firstCycle, firstCycleSize);
+   // seg_cont = type1_segment(in,work,firstCycle, firstCycleSize);
       //  (*seg_cont).out();
-    type2_segment(seg_cont,in,work, firstCycle, firstCycleSize);
-
-    faceContainer[1].out();
+    //type2_segment(seg_cont,in,work, firstCycle, firstCycleSize);
+    seg_cont->type1_segment(in,work,firstCycle,firstCycleSize);
+    seg_cont->type2_segment(in,work, firstCycle, firstCycleSize);
+    seg_cont->calcFacesBelong(*faceContainer);
+    vertex** temp;
+    (*seg_cont)[1]->get_graph()->findWayBtwContact(temp);
+    //faceContainer[1].out();
 
 std::cout<<"!\n";
     seg_cont->out();

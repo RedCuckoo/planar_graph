@@ -24,22 +24,28 @@ void faces::face::set_num (size_t number_of_face){
     num = number_of_face;
 }
 
+bool faces::face::findif (size_t i){
+    for (size_t j = 0; j < ver.size(); j++){
+        if (ver[j] == i)
+            return true;
+    }
+    return false;
+}
+
 bool faces::face::belong(graph& to_check){
-    size_t counter = 0;
     for (size_t i = 0; i < to_check.size(); i++){
         //for every vertex
         if (to_check[i]->contact()){
             //if the vertex is contact
-            for (size_t j = 0; j < ver.size(); j++){
-                //for every vertex in a faceContainer
-                if (to_check[i]->get_num() == ver[j]){
-                    //if equal to some of the vertex
-                    counter++;
-                }
+            if (findif(to_check[i]->get_num())){
+                continue;
+            }
+            else{
+                return false;
             }
         }
     }
-    return (counter == to_check.size()) ? true : false;
+    return true;
 }
 
 void faces::face::out(){
@@ -73,6 +79,15 @@ void faces::out(){
     }
 }
 
-faces::face faces::operator[](size_t i){
-    return container[i];
+faces::face* faces::operator[](size_t i){
+    return &container[i];
+}
+
+bool faces::belong(graph& to_check){
+    for (size_t i = 0; i < container.size(); i++){
+        if (container[i].belong(to_check)){
+            return true;
+        }
+    }
+    return false;
 }

@@ -18,7 +18,6 @@ private:
     size_t color = 0;
 
 public:
-
     vertex(relVec &work, size_t number);
     vertex (size_t number, size_t firstVertex, size_t secondVertex);
     vertex (vertex& to_copy);

@@ -10,16 +10,16 @@ int main()
     graph test (s);
     test.out();
 
-    int* temp = new int [3];
-    if (test.cycled(&temp,s)){
-        std::cout<<s<<'\n';
-        for (int i = 0; i < s; i++){
-           cout<<temp[i]<<" ";
-        }
-    }
-    else{
-        std::cout<<"NOT CYCLED";
-    }
+   // int* temp = new int [3];
+    //if (test.cycled(&temp,s)){
+     //   std::cout<<s<<'\n';
+   //     for (int i = 0; i < s; i++){
+   //        cout<<temp[i]<<" ";
+  //      }
+  //  }
+//    else{
+//        std::cout<<"NOT CYCLED";
+//    }
     cout<<endl;
 
     graph *n = planar::check(test);
