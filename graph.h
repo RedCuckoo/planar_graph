@@ -26,6 +26,7 @@ private:
     void clearTemp();
     bool petel;
     bool petels(relMatr &matr);
+ bool findWay (vertex* cur, std::vector<size_t>& ans, bool first = 0, vertex* prev = nullptr);
 
     relMatr* verToMatr();
 public:
@@ -40,6 +41,7 @@ public:
     graph (size_t size, const char* filename = "");
     graph (vertex** ver, size_t size);
     graph (vertex* ver);
+    graph();
     ~graph();
     void out ();
 
@@ -58,7 +60,7 @@ public:
     void operator= (graph& a);
     vertex* operator[] (size_t i);
 
-    graph* difference (graph& to_subtract);
+    graph* sumOrDif (graph& to, bool sum);
 
     //returns an array of different parts of graph without bridges
     int** find_bridges();
@@ -69,10 +71,14 @@ public:
 
     size_t graph_find (vertex** where, size_t size, size_t number);
 
-    bool findWay (vertex* cur, std::vector<int>& ans, bool first = 0, vertex* prev = nullptr);
 
-    void findWayBtwContact(vertex** ans);
+    std::vector<size_t> findWayBtwContact();
+    std::vector<size_t> findWayBtwContact(graph& has2Contact);
+    graph* get_way (std::vector<size_t> way);
+    bool empty();
 };
+
+vertex* get_vertex (vertex** in, size_t i);
 
 void graph_clear();
 

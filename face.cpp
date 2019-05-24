@@ -1,11 +1,52 @@
 #include "face.h"
+#include <algorithm>
 
 faces::face::face(size_t number_of_face){
     num = number_of_face;
 }
 
+faces::face::face(){
+
+}
+
 void faces::face::add(size_t number_of_vertex){
     ver.push_back(number_of_vertex);
+}
+
+int faces::face::find(size_t num_of_ver){
+    for (size_t i = 0; i < ver.size(); i++){
+        if (ver[i] == num_of_ver)
+            return i;
+    }
+    return -1;
+}
+void faces::face::sort(){
+    std::sort(ver.begin(), ver.end());
+}
+
+void faces::face::placeWay (face** newFace, graph& to_place, std::vector<size_t>& wayBtwContact){
+    delete *newFace;
+    *newFace = new face;
+
+    for (size_t i = 0; i < wayBtwContact.size(); i++){
+        (*newFace)->add(wayBtwContact[i]);
+    }
+
+    for (size_t i = 0; i < to_place.size(); i++){
+        if (!(*newFace)->findif(to_place[i]->get_num()))
+            (*newFace)->add(to_place[i]->get_num());
+    }
+
+
+    for (size_t i = 1; i < wayBtwContact.size()-1; i++){
+        size_t temp = find(wayBtwContact[i]);
+        if (temp != -1){
+            ver.erase(ver.begin() + temp);
+        }
+    }
+
+    sort();
+    (*newFace)->sort();
 }
 
 size_t faces::face::operator[](size_t i){
@@ -25,6 +66,9 @@ void faces::face::set_num (size_t number_of_face){
 }
 
 bool faces::face::findif (size_t i){
+    //returns true if the vertex of with num of i is present
+    //returns false otherwise
+
     for (size_t j = 0; j < ver.size(); j++){
         if (ver[j] == i)
             return true;
@@ -83,11 +127,32 @@ faces::face* faces::operator[](size_t i){
     return &container[i];
 }
 
-bool faces::belong(graph& to_check){
+int faces::belong(graph& to_check){
     for (size_t i = 0; i < container.size(); i++){
         if (container[i].belong(to_check)){
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
+}
+
+void faces::placeWay(size_t where, graph& plane, graph& to_place){
+    //to place should be a way == have two contact vertexes
+//    face *temp;
+//    container[where].placeWay(&temp,to_place);
+//    temp->set_num(container.size());
+//    container.push_back(*temp);
+
+    std::vector<size_t> temp = plane.findWayBtwContact(to_place);
+
+    face* temp1;
+
+    for (size_t i = 0; i < temp.size(); i++)
+        std::cout<<temp[i];
+
+
+    container[where].placeWay(&temp1,to_place,temp);
+    temp1->set_num(container.size());
+    container.push_back(*temp1);
+
 }

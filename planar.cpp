@@ -54,7 +54,6 @@ graph* planar::check(graph& in){
 
     graph* plane = new graph(createCycled(in,firstCycle,firstCycleSize),firstCycleSize);
 
-    //plane->out();
     std::sort (firstCycle, firstCycle+firstCycleSize);
     faces *faceContainer = initialize(firstCycle,firstCycleSize);
     faceContainer->out();
@@ -64,11 +63,16 @@ graph* planar::check(graph& in){
         however the following vertexes do
     */
 
-
+//work - the rest of the graph
+//plane - final graph
 
     //work file is the G/Gplane
-    graph* work = in.difference(*plane);
-    //int work_id = work->get_id();
+    graph* work = in.sumOrDif(*plane, 0);
+
+
+
+    int work_id = work->get_id();
+    int plane_id = plane->get_id();
 
     segments* seg_cont = new segments;
 
@@ -77,16 +81,58 @@ graph* planar::check(graph& in){
     //type2_segment(seg_cont,in,work, firstCycle, firstCycleSize);
     seg_cont->type1_segment(in,work,firstCycle,firstCycleSize);
     seg_cont->type2_segment(in,work, firstCycle, firstCycleSize);
-    seg_cont->calcFacesBelong(*faceContainer);
-    vertex** temp;
-    (*seg_cont)[1]->get_graph()->findWayBtwContact(temp);
+
+seg_cont->out();
+
+
+
+    graph temp1;
+    temp1 = *((*seg_cont)[0]->get_graph());
+
+    work = work->sumOrDif(*((*seg_cont)[0]->get_graph()),1);
+    work = work->sumOrDif(*((*seg_cont)[1]->get_graph()),1);
+
+
+
+        seg_cont->calcFacesBelong(*faceContainer);
+    std::vector<size_t> temp = (*seg_cont)[0]->get_graph()->findWayBtwContact();
     //faceContainer[1].out();
+
+
+
+graph* to_see = in.get_way(temp);
+to_see->out();
+     //   plane = plane->sumOrDif(*to_see,1);
+plane->out();
+
+faceContainer->placeWay((*((*seg_cont)[0]))[0],*plane, *to_see);
+
+faceContainer->out();
+
+(*seg_cont)[0]->recalc(*to_see);
+
+    for (size_t i = 0; i < temp.size(); i++)
+        std::cout<<temp[i]<<" ";
+    std::cout<<"\n";
+
 
 std::cout<<"!\n";
     seg_cont->out();
     std::cout<<"!\n";
+    plane->out();
+    std::cout<<"\n";
 
 
     return plane;
 
+}
+
+
+int* vectorToInt(const std::vector<size_t>& to_change){
+    int* ans = new int [to_change.size()];
+
+    for (size_t i = 0; i < to_change.size(); i++){
+        ans[i] = to_change[i];
+    }
+    return ans;
 }

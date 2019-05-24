@@ -12,10 +12,8 @@ public:
     private:
         graph* segm;
         size_t id;
-        void clearFromExtra (vertex** in, size_t to_skip);
-        vertex** create2 (graph& in, size_t num_of_ver1, size_t num_of_ver2);
         size_t faceAmount = 0;
-        std::vector <faces::face*> facesBelong;
+        std::vector <size_t> facesBelong;
     public:
         //segment() = default;
         segment (size_t id, graph& in, size_t num_of_ver1, size_t num_of_ver2);
@@ -23,11 +21,15 @@ public:
         graph* get_graph();
         size_t get_faceAmount();
         void calcFacesBelong (faces& faceContainer);
+        bool recalc (graph& to_del);
         void out();
+        size_t operator[](size_t i);
+        size_t size();
         //void checkAndAddFaces(faces& to_check);
         ~segment() = default;
     };
     void add (graph& in, int* firstCycle, size_t firstCycleSize);
+    void recalc (size_t where, graph& to_del);
     void calcFacesBelong(faces& faceContainer);
     size_t size();
     void out();
@@ -42,5 +44,8 @@ private:
 };
 
 
+        void clearFromExtra (vertex** in, size_t to_skip);
+
+        vertex** create2 (graph& in, size_t num_of_ver1, size_t num_of_ver2);
 
 #endif // SEGMENT_H

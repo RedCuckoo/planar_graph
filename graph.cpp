@@ -1,5 +1,7 @@
 #include "graph.h"
 #include "relVec.h"
+#include "planar.h"
+
 #include <string.h>
 #include <string>
 #include <fstream>
@@ -69,6 +71,10 @@ graph::graph(vertex* ver){
     size_of_graph = 1;
     graph_sort();
     verToMatr();
+}
+
+graph::graph(){
+    //readID();
 }
 
 graph::~graph(){
@@ -233,6 +239,12 @@ size_t graph::size(){
     return size_of_graph;
 }
 
+bool graph::empty(){
+    if (size_of_graph == 0)
+        return true;
+    return false;
+}
+
 vertex** graph::get_vertexes(){
     return graph_ver;
 }
@@ -344,7 +356,14 @@ size_t graph::get_id(){
     return id;
 }
 
-graph* graph::difference(graph& to_subtract){
+graph* graph::sumOrDif(graph& to, bool sum){
+    //to.out();
+
+
+    //sum==1 - to add
+    // sum == 0 - to subtract
+
+
     //be careful, you have to enter correct sizes
 
     //size - is the biggest possible graph
@@ -352,7 +371,7 @@ graph* graph::difference(graph& to_subtract){
     //to_subtract.out();
     size_t size = graph_ver[size_of_graph-1]->get_num()+1;
 
-    size_t size_to_subtract = to_subtract[to_subtract.size()-1]->get_num()+1;
+    size_t size_to = to[to.size()-1]->get_num()+1;
 
     std::string fname = "matr";
     fname += std::to_string(id);
@@ -371,7 +390,7 @@ graph* graph::difference(graph& to_subtract){
     cur.open (fname.c_str(), std::ios::out);
 
     fname = "matr";
-    fname += std::to_string(to_subtract.get_id());
+    fname += std::to_string(to.get_id());
     fname += ".txt";
 
     std::fstream sub (fname.c_str(),std::ios::in);
@@ -379,14 +398,28 @@ graph* graph::difference(graph& to_subtract){
     size_t temp;
     for (size_t i = 0; i < size; i++){
         for (size_t j = 0; j < size; j++){
-            if (i<size_to_subtract && j<size_to_subtract){
+
+            if (i<size_to && j<size_to){
                 sub>>temp;
-                if (temp == tempMatr[i][j] == 1){
-                    cur<<0<<" ";
+
+                if (!sum){
+                    if (temp == tempMatr[i][j] == 1){
+                        cur<<0<<" ";
+                    }
+                    else{
+                        cur<<tempMatr[i][j]<<" ";
+                    }
                 }
                 else{
-                    cur<<tempMatr[i][j]<<" ";
+                    if (temp == 0 && tempMatr[i][j] == 0){
+                        cur<<0<<" ";
+                    }
+                    else{
+                        cur<<1<<" ";
+                    }
                 }
+
+
             }
             else{
                 cur<<tempMatr[i][j]<<" ";
@@ -423,7 +456,6 @@ void graph::graph_sort(){
 
     for (size_t i = 0; i < size_of_graph; i++){
         graph_ver[i] = temp[graph_find(temp, size_of_graph,work[i])];
-
     }
 
 }
@@ -461,11 +493,14 @@ void graph_clear(){
 }
 
 
-bool graph::findWay(vertex* cur, std::vector<int>& ans, bool first, vertex* prev){
+bool graph::findWay(vertex* cur, std::vector<size_t>& ans, bool first, vertex* prev){
     //in order to find a vertex you need to:
     //cur - the first one, and the one you need to find is colored with gray
 
-      //  out();
+       out();
+
+        size_t e = cur->get_num();
+        cur->out();
 
     if (!first){
         ans.clear();
@@ -504,9 +539,30 @@ bool graph::findWay(vertex* cur, std::vector<int>& ans, bool first, vertex* prev
     return false;
 }
 
-void graph::findWayBtwContact(vertex** ans){
+std::vector<size_t> graph::findWayBtwContact(graph& has2Contact){
+    vertex* one = nullptr,*two = nullptr;
+    for (size_t i = 0; i < has2Contact.size(); i++){
+        if (has2Contact[i]->contact()){
+            if (!one){
+                one =graph_ver[ graph_find(graph_ver,size_of_graph,has2Contact[i]->get_num())];
+            }
+            else{
+                two =graph_ver[ graph_find(graph_ver,size_of_graph,has2Contact[i]->get_num())];
+
+                break;
+            }
+        }
+    }
+    has2Contact.clearColor();
+    two->col_gray();
+    std::vector<size_t> way;
+    findWay(one,way);
+    return way;
+}
+
+std::vector<size_t> graph::findWayBtwContact(){
     vertex* one = nullptr,* two = nullptr;
-    for (size_t i = 0; i < size(); i++){
+    for (size_t i = 0; i < size_of_graph; i++){
         if (graph_ver[i]->contact()){
             if (!one){
                 one = graph_ver[i];
@@ -520,9 +576,37 @@ void graph::findWayBtwContact(vertex** ans){
 
     clearColor();
     two->col_gray();
-    std::vector<int> way;
+    std::vector<size_t> way;
     findWay(one,way);
+//    for (size_t i = 0; i < way.size(); i++){
+//        std::cout<<way[i]<<" ";
+//    }
+//    std::cout<<"\n";
+    return way;
+}
+
+graph* graph::get_way(std::vector<size_t> way){
+    //searches in this graph for the vertexes numbers and makes it
+    graph* ans;
+
+    vertex** temp = planar::createCycled(*this,vectorToInt(way),way.size());
+
+
+    clearFromExtra(&temp[0],way[1]);
+    clearFromExtra(&temp[way.size()-1],way[way.size()-2]);
+
+
+
     for (size_t i = 0; i < way.size(); i++){
-        std::cout<<way[i]<<" ";
+        temp[i]->set_contact();
     }
+
+    ans = new graph (temp, way.size());
+    ans->out();
+
+return ans;
+}
+
+vertex* get_vertex(vertex** in, size_t i){
+    //returns a vertex, with all the connections saved
 }
