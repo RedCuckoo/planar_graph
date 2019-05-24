@@ -44,7 +44,7 @@ void relMatr::fill (const char* filename){
             input>>matr[i][j];
         }
     }
-    std::cout<<std::endl;
+   // std::cout<<std::endl;
 }
 
 void relMatr::out (){

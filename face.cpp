@@ -27,24 +27,29 @@ void faces::face::sort(){
 void faces::face::placeWay (face** newFace, graph& to_place, std::vector<size_t>& wayBtwContact){
     delete *newFace;
     *newFace = new face;
-
+out();
     for (size_t i = 0; i < wayBtwContact.size(); i++){
         (*newFace)->add(wayBtwContact[i]);
+        std::cout<<wayBtwContact[i]<<" ";
     }
+    std::cout<<std::endl;
 
     for (size_t i = 0; i < to_place.size(); i++){
-        if (!(*newFace)->findif(to_place[i]->get_num()))
+        if (!(*newFace)->findif(to_place[i]->get_num())){
             (*newFace)->add(to_place[i]->get_num());
+           std::cout<<to_place[i]->get_num();
+        }
     }
 
 
     for (size_t i = 1; i < wayBtwContact.size()-1; i++){
         size_t temp = find(wayBtwContact[i]);
+        //std::cout<<temp<<" ";
         if (temp != -1){
             ver.erase(ver.begin() + temp);
         }
     }
-
+   // std::cout<<std::endl;
     sort();
     (*newFace)->sort();
 }
@@ -73,6 +78,7 @@ bool faces::face::findif (size_t i){
         if (ver[j] == i)
             return true;
     }
+    std::cout<<std::endl;
     return false;
 }
 
@@ -127,15 +133,6 @@ faces::face* faces::operator[](size_t i){
     return &container[i];
 }
 
-int faces::belong(graph& to_check){
-    for (size_t i = 0; i < container.size(); i++){
-        if (container[i].belong(to_check)){
-            return i;
-        }
-    }
-    return -1;
-}
-
 void faces::placeWay(size_t where, graph& plane, graph& to_place){
     //to place should be a way == have two contact vertexes
 //    face *temp;
@@ -145,14 +142,15 @@ void faces::placeWay(size_t where, graph& plane, graph& to_place){
 
     std::vector<size_t> temp = plane.findWayBtwContact(to_place);
 
-    face* temp1;
 
-    for (size_t i = 0; i < temp.size(); i++)
-        std::cout<<temp[i];
+    face* newFace;
+//
+//    for (size_t i = 0; i < temp.size(); i++)
+//        std::cout<<temp[i]<<" ";
+//    std::cout<<std::endl;
 
-
-    container[where].placeWay(&temp1,to_place,temp);
-    temp1->set_num(container.size());
-    container.push_back(*temp1);
+    container[where].placeWay(&newFace,to_place,temp);
+    newFace->set_num(container.size());
+    container.push_back(*newFace);
 
 }

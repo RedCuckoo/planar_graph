@@ -22,6 +22,8 @@ public:
     vertex (size_t number, size_t firstVertex, size_t secondVertex);
     vertex (vertex& to_copy);
     ~vertex();
+    static vertex* addVertexes (vertex& one, vertex& two);
+    static vertex* difVertexes (vertex& one, vertex& two);
     void set_visited ();
     void set_blank();
     void col_gray();
@@ -38,7 +40,7 @@ public:
     size_t get_num();
     void out();
     void delNext(size_t delThis);
-
+    void addNext (size_t addThis);
     //returns vertexes connected to the current
     size_t operator[] (size_t i);
     bool operator== (vertex& to_check);

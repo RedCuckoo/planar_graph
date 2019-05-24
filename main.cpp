@@ -8,12 +8,19 @@ int main()
     graph_clear();
     cout<<"Enter how many vertexes do you have => ";int s;cin>>s;
     graph test (s);
-    //graph test1 (8);
+//    graph test1 (2);
+//
+//    test.out();
+//    std::cout<<"\n*******\n";
+//    test1.out();
+//    std::cout<<"\n*******\n";
+//   test =* test.dif(test1);
+//
+//
+//
+//    test.out();
 
-   // test =* test.sumOrDif(test1,1);
-
-   // test.out();
-
+    std::cout<<"\n*******\n";
    // int* temp = new int [3];
     //if (test.cycled(&temp,s)){
      //   std::cout<<s<<'\n';
@@ -24,9 +31,8 @@ int main()
 //    else{
 //        std::cout<<"NOT CYCLED";
 //    }
-    cout<<endl;
+   // cout<<endl;
 
-    graph *n = planar::check(test);
-    test.sumOrDif(*n,0);
+    std::cout<< planar::check(test);
     return 0;
 }

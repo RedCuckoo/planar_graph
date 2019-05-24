@@ -1,4 +1,6 @@
 #include "vertex.h"
+#include <algorithm>
+#include "planar.h"
 
 vertex::vertex(relVec &work, size_t number){
     degree = work.get_deg(number);
@@ -144,4 +146,73 @@ void vertex::delNext(size_t delThis){
             return;
         }
     }
+}
+
+void vertex::addNext(size_t addThis){
+    std::vector<size_t> temp;
+
+    for (size_t i = 0; i < degree; i++){
+        if (next_num[i] == addThis)
+            return;
+        temp.push_back(next_num[i]);
+    }
+
+    temp.push_back(addThis);
+    std::sort(temp.begin(), temp.end());
+
+    delete next_num;
+    next_num = vectorToSize_t(temp);
+    degree++;
+}
+
+vertex* vertex::addVertexes (vertex& one, vertex& two){
+    //one and two have to be the same num
+    vertex* ans = &one;
+    size_t i = 0, j = 0;
+
+    while (i<one.get_degree()){
+        if (one[i] > two[j]){
+            ans->addNext(two[j++]);
+        }
+        else if (one[i] == two[j]){
+            j++;
+        }
+        else{
+            i++;
+        }
+
+        if (j>=two.get_degree())
+            break;
+    }
+
+    while (j < two.get_degree()){
+        ans->addNext(two[j++]);
+    }
+
+    return ans;
+}
+
+vertex* vertex::difVertexes(vertex& one, vertex& two){
+    vertex* ans = &one;
+    size_t i = 0, j = 0;
+
+    while (i < one.get_degree()){
+        if (one[i] == two[j]){
+            ans->delNext(one[i]);
+        }
+        else if (one[i] < two[j]){
+            i++;
+        }
+        else{
+            j++;
+        }
+
+        if (j >= two.get_degree()){
+            break;
+        }
+    }
+    if (!ans->get_degree())
+        return nullptr;
+
+    return ans;
 }

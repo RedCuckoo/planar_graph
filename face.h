@@ -31,7 +31,7 @@ public:
         void out();
         size_t operator[](size_t i);
     };
-    int belong (graph& to_check);
+
     faces() = default;
     void placeWay (size_t where, graph& plane, graph& to_place);
     void add (face face_to_add);

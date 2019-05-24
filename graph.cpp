@@ -240,9 +240,22 @@ size_t graph::size(){
 }
 
 bool graph::empty(){
-    if (size_of_graph == 0)
+    std::string fname = "matr";
+    fname += std::to_string(id);
+    fname += ".txt";
+    std::ifstream input (fname.c_str());
+    if (input.fail())
         return true;
-    return false;
+
+    size_t temp;
+    while (input>>temp){
+        if (temp == 1){
+            input.close();
+            return false;
+        }
+    }
+    return true;
+
 }
 
 vertex** graph::get_vertexes(){
@@ -356,84 +369,88 @@ size_t graph::get_id(){
     return id;
 }
 
-graph* graph::sumOrDif(graph& to, bool sum){
-    //to.out();
+graph* graph::dif (graph& to){
+    std::vector<vertex*> temp;
 
+    size_t i = 0, j = 0;
 
-    //sum==1 - to add
-    // sum == 0 - to subtract
+    while (i < size_of_graph){
+        if (graph_ver[i]->get_num() == to[j]->get_num()){
+            vertex* temp_ver = vertex::difVertexes(*graph_ver[i],*to[j]);
+            if (temp_ver){
+                temp.push_back(temp_ver);
+            }
 
+            i++;
+            j++;
+        }
+        else if (graph_ver[i]->get_num() < to[j]->get_num()){
+            temp.push_back(graph_ver[i]);
+            i++;
+        }
+        else{
+            j++;
+        }
 
-    //be careful, you have to enter correct sizes
-
-    //size - is the biggest possible graph
-    //size_of_graph - is the actual amount of vertexes
-    //to_subtract.out();
-    size_t size = graph_ver[size_of_graph-1]->get_num()+1;
-
-    size_t size_to = to[to.size()-1]->get_num()+1;
-
-    std::string fname = "matr";
-    fname += std::to_string(id);
-    fname += ".txt";
-
-    std::fstream cur (fname.c_str(), std::ios::in);
-    size_t tempMatr[size][size];
-    for (size_t i = 0; i < size; i ++){
-        for (size_t j = 0; j < size; j++){
-            cur>>tempMatr[i][j];
+        if (j >= to.size()){
+            break;
         }
     }
-    cur.close();
 
-    fname = "matrtemp.txt";
-    cur.open (fname.c_str(), std::ios::out);
-
-    fname = "matr";
-    fname += std::to_string(to.get_id());
-    fname += ".txt";
-
-    std::fstream sub (fname.c_str(),std::ios::in);
-
-    size_t temp;
-    for (size_t i = 0; i < size; i++){
-        for (size_t j = 0; j < size; j++){
-
-            if (i<size_to && j<size_to){
-                sub>>temp;
-
-                if (!sum){
-                    if (temp == tempMatr[i][j] == 1){
-                        cur<<0<<" ";
-                    }
-                    else{
-                        cur<<tempMatr[i][j]<<" ";
-                    }
-                }
-                else{
-                    if (temp == 0 && tempMatr[i][j] == 0){
-                        cur<<0<<" ";
-                    }
-                    else{
-                        cur<<1<<" ";
-                    }
-                }
-
-
-            }
-            else{
-                cur<<tempMatr[i][j]<<" ";
-
-            }
-        }
-        cur<<"\n";
+    while (i < size_of_graph){
+        temp.push_back(graph_ver[i++]);
     }
 
-    cur.close();
-    sub.close();
+    vertex** ans_ver = new vertex* [temp.size()];
+    for (size_t i = 0; i < temp.size(); i++){
+        ans_ver[i] = temp[i];
+    }
 
-    graph *ans = new graph (size, "matrtemp.txt");
-    remove ("matrtemp.txt");
+   if (temp.size()){
+        graph* ans = new graph(ans_ver, temp.size());
+        return ans;
+   }
+
+   return nullptr;
+
+}
+
+graph* graph::sum(graph& to){
+    std::vector<vertex*> temp;
+
+    size_t i = 0, j = 0;
+
+    while (i < size_of_graph){
+        if (graph_ver[i]->get_num() > to[j]->get_num()){
+            temp.push_back(to[j++]);
+        }
+        else if (graph_ver[i]->get_num() == to[j]->get_num()){
+            temp.push_back(vertex::addVertexes(*graph_ver[i++],*to[j++]));
+        }
+        else{
+            temp.push_back(graph_ver[i++]);
+        }
+
+        if (j >= to.size()){
+            break;
+        }
+
+    }
+
+    while (j < to.size()){
+        temp.push_back(to[j++]);
+    }
+
+    while (i < to.size()){
+        temp.push_back(to[i++]);
+    }
+
+    vertex** ans_ver = new vertex* [temp.size()];
+    for (size_t i = 0; i < temp.size(); i++){
+        ans_ver[i] = temp[i];
+    }
+
+    graph* ans = new graph(ans_ver, temp.size());
     return ans;
 }
 
@@ -497,10 +514,10 @@ bool graph::findWay(vertex* cur, std::vector<size_t>& ans, bool first, vertex* p
     //in order to find a vertex you need to:
     //cur - the first one, and the one you need to find is colored with gray
 
-       out();
+       //out();
 
-        size_t e = cur->get_num();
-        cur->out();
+       // size_t e = cur->get_num();
+       // cur->out();
 
     if (!first){
         ans.clear();
@@ -513,7 +530,7 @@ bool graph::findWay(vertex* cur, std::vector<size_t>& ans, bool first, vertex* p
         cur->col_gray();
         for (int i = 0; i < cur->get_degree(); i++){
             if (!prev || prev->get_num() != (*cur)[i]){
-                if (findWay(graph_ver[graph_find(graph_ver,size_of_graph,(*cur)[i])],ans,1,graph_ver[cur->get_num()])){
+                if (findWay(graph_ver[graph_find(graph_ver,size_of_graph,(*cur)[i])],ans,1,graph_ver[graph_find(graph_ver,size_of_graph,cur->get_num())])){
                     ans.push_back(cur->get_num());
                     if (cur->get_num() == ans[0]){
                         ans.erase (ans.begin());
@@ -560,6 +577,41 @@ std::vector<size_t> graph::findWayBtwContact(graph& has2Contact){
     return way;
 }
 
+//std::vector<size_t> graph::findWayBtwContact(){
+//    size_t to_find_index;
+//    size_t finish_index;
+//    bool sw = false;
+//    //out();
+//    for (size_t i = 0; i < size_of_graph; i++){
+//            graph_ver[i]->out();
+//        if (graph_ver[i]->contact()){
+//            if (!sw){
+//                to_find_index = i;
+//                sw = true;
+//            }
+//            else{
+//                finish_index = i;
+//                break;
+//            }
+//        }
+//    }
+//
+//    clearColor();
+//    graph_ver[finish_index]->col_gray();
+//    std::vector<size_t> way;
+//
+//    graph_ver[to_find_index]->out();
+//    graph_ver[finish_index]->out();
+//
+//
+//    findWay(graph_ver[to_find_index],way);
+////    for (size_t i = 0; i < way.size(); i++){
+////        std::cout<<way[i]<<" ";
+////    }
+////    std::cout<<"\n";
+//    return way;
+//}
+
 std::vector<size_t> graph::findWayBtwContact(){
     vertex* one = nullptr,* two = nullptr;
     for (size_t i = 0; i < size_of_graph; i++){
@@ -602,7 +654,7 @@ graph* graph::get_way(std::vector<size_t> way){
     }
 
     ans = new graph (temp, way.size());
-    ans->out();
+    //ans->out();
 
 return ans;
 }

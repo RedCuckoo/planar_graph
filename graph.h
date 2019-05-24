@@ -60,7 +60,8 @@ public:
     void operator= (graph& a);
     vertex* operator[] (size_t i);
 
-    graph* sumOrDif (graph& to, bool sum);
+    graph* sum (graph& to);
+    graph* dif (graph& to);
 
     //returns an array of different parts of graph without bridges
     int** find_bridges();

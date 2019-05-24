@@ -1,5 +1,6 @@
 #include "segment.h"
 #include "planar.h"
+#include <algorithm>
 
 segments::segment::segment (size_t id, graph& in, int* firstCycle, size_t firstCycleSize){
    //adds a graph, marking contact vertexes
@@ -17,6 +18,10 @@ segments::segment::segment (size_t id, graph& in,size_t num_of_ver1, size_t num_
     segm = new graph(temp,2);
 }
 
+//segments::segment::~segment(){
+//    segm->~graph();
+//}
+
 graph* segments::segment::get_graph(){
     return segm;
 }
@@ -28,6 +33,10 @@ size_t segments::segment::get_faceAmount(){
 void segments::segment::out(){
     std::cout<<"ID: "<<id<<" | face_amount: "<<faceAmount<<'\n';
     segm->out();
+    for (size_t i = 0; i < facesBelong.size(); i++){
+        std::cout<<facesBelong[i]<<" ";
+    }
+    std::cout<<'\n';
 }
 
 size_t segments::size(){
@@ -44,11 +53,12 @@ size_t segments::segment::size(){
 
 bool segments::segment::recalc(graph& to_del){
     //returns true if we need to delete this segment
-    graph temp;
-    temp = *segm->sumOrDif(to_del,0);
-    if (temp.empty())
+    segm = segm->dif(to_del);
+    if (!segm)
         return true;
-temp.out();
+
+
+
     return false;
 }
 
@@ -58,9 +68,33 @@ void segments::out(){
     }
 }
 
+void segments::segment::operator++(){
+    faceAmount++;
+}
+
+void segments::sort(){
+    bool ex = false;
+    while (!ex){
+        ex = true;
+        for (size_t i = 0; i < container.size() - 1; i++){
+            if (container[i].get_faceAmount()> container[i + 1].get_faceAmount()){
+                std::swap(container[i], container[i+1]);
+                ex = false;
+            }
+        }
+    }
+
+}
+
 segments::segment* segments::operator[](size_t i){
     //i is the id of the segment
     return &container[i];
+}
+
+segments::~segments(){
+    for (size_t i = 0; i < container.size(); i++){
+        container[i].~segment();
+    }
 }
 
 void segments::add(graph& in, size_t num_of_ver1, size_t num_of_ver2){
@@ -86,39 +120,47 @@ void segments::type1_segment (graph& main, graph* difference, int* firstCycle, i
             }
         }
     }
-    container[0].out();
+    //container[0].out();
 }
 
 void segments::type2_segment (graph& main, graph* difference, int* firstCycle, size_t firstCycleSize){
     graph work;
     work = *difference;
     for (size_t i = 0; i < container.size(); i++){
-        work = *(work.sumOrDif(*(container[i].get_graph()),0));
-        difference->out();
+       // work.out();
+        //container[i].out();
+        work = *(work.dif(*(container[i].get_graph())));
+       // work.out();
     }
     add(work,firstCycle,firstCycleSize);
 }
 
-void segments::segment::calcFacesBelong(faces& faceContainer){
-    faceAmount = 0;
-    int temp;
-    for (size_t j = 0; j < faceContainer.size(); j++){
-        temp = faceContainer.belong(*segm);
-        if (temp > -1){
-            faceAmount++;
-            facesBelong.push_back(temp);
-        }
-    }
+void segments::segment::add(size_t i){
+    facesBelong.push_back(i);
+    std::sort(facesBelong.begin(), facesBelong.end());
+}
+
+void segments::segment::set_faceAmount(size_t i){
+    faceAmount = i;
 }
 
 void segments::calcFacesBelong(faces& faceContainer){
     for (size_t i = 0; i < container.size(); i++){
-        container[i].calcFacesBelong(faceContainer);
+        container[i].set_faceAmount(0);
+        for (size_t j = 0; j < faceContainer.size(); j++){
+            if (faceContainer[j]->belong(*container[i].get_graph())){
+                container[i].add(j);
+                ++container[i];
+            }
+        }
     }
 }
 
 void segments::recalc(size_t where, graph& to_del){
-
+    if (container[where].recalc(to_del)){
+        //container[where].~segment();
+        container.erase(container.begin() + where);
+    }
 }
 
 void clearFromExtra(vertex** in, size_t to_skip){
